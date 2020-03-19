@@ -1,0 +1,7 @@
+{
+  "host" : "db host",
+  "port" : 3306,
+  "db" : "aspace db name",
+  "username" : "username",
+  "password" : "password"
+}
