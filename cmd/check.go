@@ -28,7 +28,6 @@ func init() {
 	rootCmd.AddCommand(checkCmd)
 }
 
-
 func initConfig() {
 	if csvfile == "" {
 		csvfile = "output.csv"
@@ -47,7 +46,7 @@ func GenerateCSV() error {
 	}
 	defer csvFile.Close()
 
-	repositories := []int{2,3,6}
+	repositories := []int{2, 3, 6}
 
 	for i := range repositories {
 		repositoryId := repositories[i]
@@ -63,13 +62,15 @@ func GenerateCSV() error {
 				return err
 			}
 			eadid := resource.EADID
-			t := resource.Title
-			t = strings.Replace(t, "\"", "", -1)
-			title := strings.Replace(t, ",", "", -1)
-			id0 := resource.ID0
-			id1 := resource.ID1
-			id2 := resource.ID2
-			id3 := resource.ID3
+			eadlocat := resource.EADLocation
+			title := resource.Title
+			title = strings.Replace(title, "\"", "", -1)
+			title = strings.Replace(title, "\n", "", -1)
+			title = strings.Replace(title, ",", "", -1)
+			id0 := strings.Trim(resource.ID0, " ")
+			id1 := strings.Trim(resource.ID1, " ")
+			id2 := strings.Trim(resource.ID2, " ")
+			id3 := strings.Trim(resource.ID3, " ")
 
 			target := ""
 			if id0 != "" {
@@ -85,11 +86,14 @@ func GenerateCSV() error {
 				target = target + "_" + id3
 			}
 			target = strings.ToLower(target)
+			target = strings.ReplaceAll(target, " ", "")
+			target = strings.ReplaceAll(target, ",", "")
+			target = strings.ReplaceAll(target, ".", "")
 
 			fmt.Print(title)
 			if eadid != target {
 				fmt.Println(": KO")
-				writeString, err := csvFile.WriteString(fmt.Sprintf("%d,%d,%s,%s,%s\n", repositoryId, resourceId, title, eadid, target))
+				writeString, err := csvFile.WriteString(fmt.Sprintf("%d,%d,%s,%s,%s,%s,%s,%s,%s,%s\n", repositoryId, resourceId, title, eadlocat, id0, id1, id2, id3, eadid, target))
 				if err != nil {
 					log.Println(writeString)
 					log.Fatal(err)
