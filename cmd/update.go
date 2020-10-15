@@ -12,6 +12,8 @@ import (
 	"os"
 	"strconv"
 	_ "github.com/go-sql-driver/mysql"
+	"strings"
+	"time"
 )
 
 type MySQLConf struct {
@@ -99,11 +101,14 @@ func update() error {
 			return err
 		}
 
-		eadid := line[4]
+		eadid := strings.ReplaceAll(line[4], " ", "")
+		eadid = strings.ReplaceAll(eadid, ",", "")
+
 
 		log.Printf("updateing resource %d ead_id to: %s\n", resourceId, eadid)
 
-		query := fmt.Sprintf("Update resource set ead_id = '%s' where id = '%d'", eadid, resourceId)
+		now := time.Now()
+		query := fmt.Sprintf("Update resource set ead_id = '%s', last_modified_by = 'donbot', system_mtime = '%s', user_mtime = '%s'where id = '%d'", eadid, now, now, resourceId)
 
 		result, err := db.Exec(query)
 

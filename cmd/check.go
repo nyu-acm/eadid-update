@@ -2,14 +2,15 @@ package cmd
 
 import (
 	"fmt"
-	go_aspace "github.com/nyudlts/go-aspace"
+	go_aspace "github.com/nyudlts/go-aspace/lib"
 	"github.com/spf13/cobra"
 	"log"
 	"os"
 	"strings"
 )
 
-var csvfile string
+var aspace = go_aspace.Client
+var tsvfile string
 var checkCmd = &cobra.Command{
 
 	Use:   "check",
@@ -24,40 +25,36 @@ var checkCmd = &cobra.Command{
 }
 
 func init() {
-	checkCmd.PersistentFlags().StringVar(&csvfile, "csv", "", "default is output.csv")
+	checkCmd.PersistentFlags().StringVar(&tsvfile, "tsv", "", "default is output.csv")
 	rootCmd.AddCommand(checkCmd)
 }
 
 func initConfig() {
-	if csvfile == "" {
-		csvfile = "output.csv"
+	if tsvfile == "" {
+		tsvfile = "output.tsv"
 	}
 }
 
 func GenerateCSV() error {
-	ASpaceClient, err := go_aspace.NewClient(100)
-	if err != nil {
-		return err
-	}
 
-	csvFile, err := os.Create(csvfile)
+	tsvFile, err := os.Create(tsvfile)
 	if err != nil {
 		return err
 	}
-	defer csvFile.Close()
+	defer tsvFile.Close()
 
 	repositories := []int{2, 3, 6}
 
 	for i := range repositories {
 		repositoryId := repositories[i]
-		resources, err := ASpaceClient.GetResourceIDsByRepository(repositoryId)
+		resources, err := aspace.GetResourceIDsByRepository(repositoryId)
 		if err != nil {
 			return err
 		}
 
 		for j := range resources {
 			resourceId := resources[j]
-			resource, err := ASpaceClient.GetResourceByID(repositoryId, resourceId)
+			resource, err := aspace.GetResourceByID(repositoryId, resourceId)
 			if err != nil {
 				return err
 			}
@@ -93,7 +90,7 @@ func GenerateCSV() error {
 			fmt.Print(title)
 			if eadid != target {
 				fmt.Println(": KO")
-				writeString, err := csvFile.WriteString(fmt.Sprintf("%d,%d,%s,%s,%s,%s,%s,%s,%s,%s\n", repositoryId, resourceId, title, eadlocat, id0, id1, id2, id3, eadid, target))
+				writeString, err := tsvFile.WriteString(fmt.Sprintf("%d\t%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n", repositoryId, resourceId, title, eadlocat, id0, id1, id2, id3, eadid, target))
 				if err != nil {
 					log.Println(writeString)
 					log.Fatal(err)
